@@ -50,7 +50,7 @@ for turn in range(6): #I might need to change this to a while statement and subt
     if turn == 0: #If I decide to do difficulty levels, lets do this, but it's not necessary
 #        difficulty = int(input("Please select a difficult level: Easy, Medium, or Hard."))
 #        difficulty = difficulty.upper()
-        #ADD BELOW BACK LATER
+        ###########ADD BELOW BACK LATER
         #word = allwords.text.splitlines()[random.randint(0, (len(allwords.text.splitlines())))] #randomly select a word
         word = "zebra"
         word = word.upper() #want everything in caps to make things consistent

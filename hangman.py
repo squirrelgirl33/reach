@@ -109,7 +109,8 @@ alive = r"""\
                 """
 
 #Input is integer for # of chances. Will return grammatically correct statement on how many are left.
-def remaining_chances(chances):
+def remaining_chances(turn):
+    chances = abs(turn - 6)
     if chances > 1:
         print("You have", chances, "chances remaining.", judgment_day(turn))
     if chances == 1:
@@ -117,29 +118,29 @@ def remaining_chances(chances):
 
 #Input is how many times the user has input something that is not a valid option.
 #Program responses get increasingly frustrated and sad as time goes on.
-def growing_frustration(wrongentry):
+def growing_frustration(wrongentry, guess, prevguess, turn):
     wrongentry +=1
     if wrongentry <= 5:
         if guess in prevguess:
             print("\n\nYou've already guessed that letter! Please guess again!")
-            remaining_chances(chances)
+            remaining_chances(turn)
         else:
             print("\n\nPlease try again and just enter a single letter.")
-            remaining_chances(chances)
+            remaining_chances(turn)
     if wrongentry >5 and wrongentry <= 10:
         if guess in prevguess:
             print("\n\nPay attention to the previous guesses. Come on now. Please guess again!")
-            remaining_chances(chances)
+            remaining_chances(turn)
         else:
             print("\n\nCome on, you know that's not a single letter. You can do this. Please enter just a single letter.\n")
-            remaining_chances(chances)
+            remaining_chances(turn)
     if wrongentry >10 and wrongentry <=20:
         if guess in prevguess:
             print("\n\nAre you trying to test me or something? You've tried that already. It's not going to help you anymore. I'm starting to get irritated. Try again. Correctly this time.")
-            remaining_chances(chances)
+            remaining_chances(turn)
         else:
             print("\n\nWhy are you doing this? Do you not know what a letter is? I'll help. A, B, C, D, E...those are all letters. You're getting annoying. Now try again.\n")
-            remaining_chances(chances)
+            remaining_chances(turn)
     if wrongentry > 20 and wrongentry < 50:
         despair = ["\n\nStop. Please stop.", 
                    "\n\nWhy are you doing this? Don't actually tell me. Just enter a correct value.", 
@@ -151,10 +152,10 @@ def growing_frustration(wrongentry):
                    "\n\nENTER THE CORRECT VALUE.",
                    "\n\nI wish you never played this game."]
         print(despair[random.randint(0,len(despair)-1)])
-        remaining_chances(chances)
+        remaining_chances(turn)
     if wrongentry >= 50:
         print("\n\n ;_;")
-        remaining_chances(chances)
+        remaining_chances(turn)
     return wrongentry
 
 #Get user's name
@@ -210,78 +211,83 @@ def show_scores(scoreboard):
     print("\nCurrent Scoreboard")
     order = sorted(scoreboard, key=scoreboard.get, reverse=True)
     for i in range(len(order)):
-        print(order[i][0:(len(order[i])-8)], "."*(35-len(str(scoreboard[order[i]]))-len(order[i])+8)
-, scoreboard[order[i]])
+        if i <10:
+            print(order[i][0:(len(order[i])-8)], 
+                  "."*(35-len(str(scoreboard[order[i]]))-len(order[i])+8), 
+                  scoreboard[order[i]])
+        else:
+            del scoreboard[order[i]] #Keep scoreboard only 10 names long.
 
 
 #### ACTUAL PROGRAM  ####
-
-for turn in range(6):
-    if turn == 0: 
-        print("\n\nWelcome to Hangman!\n") #Only shown once
-        wrongentry=0 #keep track of how many times someone has entered the wrong thing
-        name = get_name()
-        word, points = get_word()
-        scoreboard[name] = 0
-        tempword = [] #placeholder to show progress in checking the word
-        prevguess = [] #display previous guesses.
-        for char in word:
-            tempword.append("_") #make spaces equal to number of characters in word
-    chances = abs(turn - 6) 
-    remaining_chances(chances) #Show user how many chances are remaining
-    print("Your word is:")
-    while turn <=5: #This loop checks if input is correct. If not, it rejects it.
-        print("\n", *tempword, sep=" ")
-        print("Previously guessed:", *prevguess, sep=" ")
-        guess = input("Please guess a letter:")
-        if guess.isalpha():
-            guess = guess.upper()
-            if len(guess)==1 and guess not in prevguess: #if it's a single letter, it's correct
-                prevguess.append(guess)
-                break #kill the infinite loop.
-            else:
-                wrongentry = growing_frustration(wrongentry)
-        else:
-            wrongentry = growing_frustration(wrongentry)
-    newturn = turn #I want to continue this cycle and not deduct a turn unless they guess wrong.
-    while newturn == turn: #this loop actually checks if the guess is in the word
-        if guess in word:
-            for i in range(len(word)):
-                if guess == word[i]:
-                    tempword[i]=guess
-                    scoreboard[name] += points
-            if "".join(tempword) == word: #identify if guess now matches the full word
-                print("\n", *tempword, sep=" ")
-                print("\n\nCongratulations! You won!", alive)
-                scoreboard[name] += 5*points + points*chances
-                newturn -= 1
-                break #break to end loop and end game
-            else:
-                print("\n\nGood job, now guess again!")
-                remaining_chances(chances)
-            while turn <=5: #Need to add this so additional turns don't count if they keep being correct.
-                print("\n", *tempword, sep=" ")
-                print("Previously guessed:", *prevguess, sep=" ")
-                guess = input("Please guess a letter:")
-                if guess.isalpha():
-                    guess = guess.upper() #Need to prevent prevguess from counting capital and lowercase
-                    if len(guess)==1 and guess not in prevguess: #if it's a single letter, it's correct
-                        guess = guess.upper()
-                        prevguess.append(guess)
-                        break #kill the infinite loop.
-                    else:
-                        wrongentry = growing_frustration(wrongentry)
+def hang_man():
+    for turn in range(6):
+        if turn == 0: 
+            print("\n\nWelcome to Hangman!\n") #Only shown once
+            wrongentry=0 #keep track of how many times someone has entered the wrong thing
+            name = get_name()
+            word, points = get_word()
+            scoreboard[name] = 0
+            tempword = [] #placeholder to show progress in checking the word
+            prevguess = [] #display previous guesses.
+            for char in word:
+                tempword.append("_") #make spaces equal to number of characters in word
+        remaining_chances(turn) #Show user how many chances are remaining
+        print("Your word is:")
+        while turn <=5: #This loop checks if input is correct. If not, it rejects it.
+            print("\n", *tempword, sep=" ")
+            print("Previously guessed:", *prevguess, sep=" ")
+            guess = input("Please guess a letter:")
+            if guess.isalpha():
+                guess = guess.upper()
+                if len(guess)==1 and guess not in prevguess: #if it's a single letter, it's correct
+                    prevguess.append(guess)
+                    break #kill the infinite loop.
                 else:
-                    wrongentry = growing_frustration(wrongentry) 
-        if guess not in word:
-            if turn < 5:
-                print("\n\nSorry, try again!")
-                newturn -= 1
-            if turn == 5:
-                print("\n\nYou lose!", dead)
-                print("Your word was:", word)
-                show_scores(scoreboard)
-                break
-    if "".join(tempword) == word: #If you've won, kill the game
-        show_scores(scoreboard)
-        break
+                    wrongentry = growing_frustration(wrongentry, guess, prevguess, turn)
+            else:
+                wrongentry = growing_frustration(wrongentry, guess, prevguess, turn)
+        newturn = turn #I want to continue this cycle and not deduct a turn unless they guess wrong.
+        while newturn == turn: #this loop actually checks if the guess is in the word
+            if guess in word:
+                for i in range(len(word)):
+                    if guess == word[i]:
+                        tempword[i]=guess
+                        scoreboard[name] += points
+                if "".join(tempword) == word: #identify if guess now matches the full word
+                    print("\n", *tempword, sep=" ")
+                    print("\n\nCongratulations! You won!", alive)
+                    scoreboard[name] += 5*points + points*abs(6-turn)
+                    newturn -= 1
+                    break #break to end loop and end game
+                else:
+                    print("\n\nGood job, now guess again!")
+                    remaining_chances(turn)
+                while turn <=5: #Need to add this so additional turns don't count if they keep being correct.
+                    print("\n", *tempword, sep=" ")
+                    print("Previously guessed:", *prevguess, sep=" ")
+                    guess = input("Please guess a letter:")
+                    if guess.isalpha():
+                        guess = guess.upper() #Need to prevent prevguess from counting capital and lowercase
+                        if len(guess)==1 and guess not in prevguess: #if it's a single letter, it's correct
+                            guess = guess.upper()
+                            prevguess.append(guess)
+                            break #kill the infinite loop.
+                        else:
+                            wrongentry = growing_frustration(wrongentry, guess, prevguess, turn)
+                    else:
+                        wrongentry = growing_frustration(wrongentry, guess, prevguess, turn) 
+            if guess not in word:
+                if turn < 5:
+                    print("\n\nSorry, try again!")
+                    newturn -= 1
+                if turn == 5:
+                    print("\n\nYou lose!", dead)
+                    print("Your word was:", word)
+                    show_scores(scoreboard)
+                    break
+        if "".join(tempword) == word: #If you've won, kill the game
+            show_scores(scoreboard)
+            break
+
+hang_man()

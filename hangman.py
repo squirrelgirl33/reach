@@ -5,12 +5,6 @@ Created on Sat Sep 21 15:52:43 2019
 @author: Kathryn
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Sep 18 18:14:07 2019
-
-@author: Kathryn
-"""
 
 ##Actual code
 
@@ -118,29 +112,23 @@ def remaining_chances(turn):
 
 #Input is how many times the user has input something that is not a valid option.
 #Program responses get increasingly frustrated and sad as time goes on.
-def growing_frustration(wrongentry, guess, prevguess, turn):
+def growing_frustration(wrongentry, guess, prevguess):
     wrongentry +=1
     if wrongentry <= 5:
         if guess in prevguess:
             print("\n\nYou've already guessed that letter! Please guess again!")
-            remaining_chances(turn)
         else:
             print("\n\nPlease try again and just enter a single letter.")
-            remaining_chances(turn)
     if wrongentry >5 and wrongentry <= 10:
         if guess in prevguess:
             print("\n\nPay attention to the previous guesses. Come on now. Please guess again!")
-            remaining_chances(turn)
         else:
             print("\n\nCome on, you know that's not a single letter. You can do this. Please enter just a single letter.\n")
-            remaining_chances(turn)
     if wrongentry >10 and wrongentry <=20:
         if guess in prevguess:
             print("\n\nAre you trying to test me or something? You've tried that already. It's not going to help you anymore. I'm starting to get irritated. Try again. Correctly this time.")
-            remaining_chances(turn)
         else:
             print("\n\nWhy are you doing this? Do you not know what a letter is? I'll help. A, B, C, D, E...those are all letters. You're getting annoying. Now try again.\n")
-            remaining_chances(turn)
     if wrongentry > 20 and wrongentry < 50:
         despair = ["\n\nStop. Please stop.", 
                    "\n\nWhy are you doing this? Don't actually tell me. Just enter a correct value.", 
@@ -152,10 +140,8 @@ def growing_frustration(wrongentry, guess, prevguess, turn):
                    "\n\nENTER THE CORRECT VALUE.",
                    "\n\nI wish you never played this game."]
         print(despair[random.randint(0,len(despair)-1)])
-        remaining_chances(turn)
     if wrongentry >= 50:
         print("\n\n ;_;")
-        remaining_chances(turn)
     return wrongentry
 
 #Get user's name
@@ -209,7 +195,7 @@ def get_word():
 #Show scoreboard for participant and previous participants at the end
 def show_scores(scoreboard):
     print("\nCurrent Scoreboard")
-    order = sorted(scoreboard, key=scoreboard.get, reverse=True)
+    order = sorted(scoreboard, key=scoreboard.get, reverse=True) #make lsit of scores with highest scoring first
     for i in range(len(order)):
         if i <10:
             print(order[i][0:(len(order[i])-8)], 
@@ -217,6 +203,7 @@ def show_scores(scoreboard):
                   scoreboard[order[i]])
         else:
             del scoreboard[order[i]] #Keep scoreboard only 10 names long.
+
 
 
 #### ACTUAL PROGRAM  ####
@@ -244,9 +231,11 @@ def hang_man():
                     prevguess.append(guess)
                     break #kill the infinite loop.
                 else:
-                    wrongentry = growing_frustration(wrongentry, guess, prevguess, turn)
+                    wrongentry = growing_frustration(wrongentry, guess, prevguess)
+                    remaining_chances(turn)
             else:
-                wrongentry = growing_frustration(wrongentry, guess, prevguess, turn)
+                wrongentry = growing_frustration(wrongentry, guess, prevguess)
+                remaining_chances(turn)
         newturn = turn #I want to continue this cycle and not deduct a turn unless they guess wrong.
         while newturn == turn: #this loop actually checks if the guess is in the word
             if guess in word:
@@ -274,9 +263,11 @@ def hang_man():
                             prevguess.append(guess)
                             break #kill the infinite loop.
                         else:
-                            wrongentry = growing_frustration(wrongentry, guess, prevguess, turn)
+                            wrongentry = growing_frustration(wrongentry, guess, prevguess)
+                            remaining_chances(turn)
                     else:
-                        wrongentry = growing_frustration(wrongentry, guess, prevguess, turn) 
+                        wrongentry = growing_frustration(wrongentry, guess, prevguess)
+                        remaining_chances(turn)
             if guess not in word:
                 if turn < 5:
                     print("\n\nSorry, try again!")

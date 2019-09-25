@@ -177,7 +177,7 @@ def word_difficulty(response):
 
 #Choose a word dependent upon the desired difficulty level. Also assign point values
 def get_word():
-    n = 1
+    n = 1 #here purely to facilitate my error detecting loop
     while n==1:
         difficulty = input("Please type in a word difficulty level: Easy, Medium, or Hard.")
         if difficulty.isalpha():
@@ -227,7 +227,7 @@ def hang_man():
             guess = input("Please guess a letter:")
             if guess.isalpha():
                 guess = guess.upper()
-                if len(guess)==1 and guess not in prevguess: #if it's a single letter, it's correct
+                if len(guess)==1 and guess not in prevguess: #if it's a single letter, it hasn't been guessed before
                     prevguess.append(guess)
                     break #kill the infinite loop.
                 else:
@@ -241,14 +241,14 @@ def hang_man():
             if guess in word:
                 for i in range(len(word)):
                     if guess == word[i]:
-                        tempword[i]=guess
+                        tempword[i]=guess #fill in the blanks
                         scoreboard[name] += points
                 if "".join(tempword) == word: #identify if guess now matches the full word
                     print("\n", *tempword, sep=" ")
                     print("\n\nCongratulations! You won!", alive)
                     scoreboard[name] += 5*points + points*abs(6-turn)
-                    newturn -= 1
-                    break #break to end loop and end game
+                    show_scores(scoreboard)
+                    return #kill game when you win
                 else:
                     print("\n\nGood job, now guess again!")
                     remaining_chances(turn)
@@ -276,9 +276,6 @@ def hang_man():
                     print("\n\nYou lose!", dead)
                     print("Your word was:", word)
                     show_scores(scoreboard)
-                    break
-        if "".join(tempword) == word: #If you've won, kill the game
-            show_scores(scoreboard)
-            break
+                    return #kill game once you lose
 
 hang_man()
